@@ -1,10 +1,11 @@
-const dotenv = require('dotenv');
-const valores = dotenv.config();
+require('dotenv').config();
 
-if (valores.error) {
-  throw valores.error;
-}
-
-const {parsed: envs} = valores;
-
-module.exports = envs;
+module.exports = {
+  development: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    dialect: 'postgres',
+  },
+};

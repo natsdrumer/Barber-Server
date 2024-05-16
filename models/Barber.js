@@ -1,17 +1,16 @@
-const {Sequelize, DataTypes} = require('sequelize');
-const sequelize = require('../config/databaseConnection');
-const { type } = require('os');
-
-const Barber = sequelize.define('barber',
-    {
-        id:{
-            type: DataTypes.INTEGER,
-            allwNull: false,
-            primaryKey: true,
-            autoIncrement: true
-        },
-        name:{
-            type: DataTypes.STRING,
-        }
-    }
-)
+module.exports = (sequelize, DataTypes) => {
+    const Barber = sequelize.define('Barber', {
+      barberId: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      specialty: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+    });
+  
+    return Barber;
+  };
+  

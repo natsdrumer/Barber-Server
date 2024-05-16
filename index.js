@@ -1,7 +1,7 @@
 const express = require('express');
 const userRoutes = require('./routes/userRoute');
-const db = require('./config/databaseConnection');
-
+// const sequelize = require('./config/databaseConnection');
+const {sequelize} = require('./models');
 
 
 const app = express();
@@ -9,16 +9,16 @@ const port = 3030;
 app.use(express.json());
 app.use('/users', userRoutes);
 
-db.authenticate()
+sequelize.authenticate()
 .then(() => {
-    console.log('conexao com a db sucesso');
+    console.log('conexao com a sequelize sucesso');
 }).catch((err) => {
     console.log(err)
 });
 
-db.sync()
+sequelize.sync()
 .then(() => {
-    console.log('db sync');
+    console.log('sequelize sync');
 }).catch((err) => {
     console.log(err)
 })
