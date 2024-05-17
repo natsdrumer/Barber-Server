@@ -1,24 +1,32 @@
 const express = require('express');
 const userRoutes = require('./routes/userRoute');
-// const sequelize = require('./config/databaseConnection');
-const {sequelize} = require('./models');
-
-
+const db = require('./config/databaseConnection');
+const cookieParser = require('cookie-parser');
+//const {db} = require('./models');
+require('dotenv').config();
+const cors = require('cors');
 const app = express();
 const port = 3030;
+
 app.use(express.json());
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
+app.use(cookieParser());
+
 app.use('/users', userRoutes);
 
-sequelize.authenticate()
+db.authenticate()
 .then(() => {
-    console.log('conexao com a sequelize sucesso');
+    console.log('conexao com a db sucesso');
 }).catch((err) => {
     console.log(err)
 });
 
-sequelize.sync()
+db.sync()
 .then(() => {
-    console.log('sequelize sync');
+    console.log('db sync');
 }).catch((err) => {
     console.log(err)
 })

@@ -1,7 +1,10 @@
 const User = require('../models/User');
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken');
+const expire = 1800;
 
 const userController = {
+
     getAll: async (req, res) => {
         console.log('user metodo getall')
         try {
@@ -19,10 +22,14 @@ const userController = {
       const userId = req.params.id;
       try {
         const user = await User.findByPk(userId);
+        if(!user){
+          res.status(404).json({message : 'User not found'})
+          return;
+        }
         res.status(200).json(user);
       } catch (err) {
         console.log(err.message);
-        res.status(404).json({message : 'User not found'})
+        res.status(500).json({message : 'Internal error'})
         
       }
     },
@@ -59,7 +66,7 @@ const userController = {
 
         if(user){
           await user.destroy()
-          res.status(204).json({message: 'User deleted sucessfully'});
+          res.status(200).json({message: 'User deleted sucessfully'});
         }else{
           res.status(404).json('user not found')
         }
@@ -87,10 +94,10 @@ const userController = {
             const { name, email, password } = req.body;
         
             //Hash password before saving (assuming you have bcrypt installed)
-            const saltRounds = 10;
-            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            /* const saltRounds = 10;
+            const hashedPassword = await bcrypt.hash(password, saltRounds); */
         
-            const newUser = { name, email, password: hashedPassword};
+            const newUser = { name, email, password};
             const createdUser = await User.create(newUser);
         
             // Exclude password before sending response
@@ -102,7 +109,46 @@ const userController = {
             console.error('Error creating user:', error);
             res.status(500).json({ message: 'Error creating user' });
           }
+    }, 
+
+    login: async(req, res) => {
+
+      console.log('login request recebido');
+
+      const { email, password } = req.body; // Assuming login data is in request body
+    
+      try {
+        // Find user by username (replace with your user model logic)
+        const user = await User.findOne({ where: { email } });
+    
+        if (!user) {
+          return res.status(404).json({ message: 'user not exist' });
+        }
+    
+        // Validate password (replace with secure password hashing logic)
+        const isValidPassword = await bcrypt.compare(password, user.password); // Assuming password is hashed
+    
+        if (!isValidPassword) {
+          return res.status(401).json({ message: 'Invalid username or password' });
+          console.log('password not valid');
+        }
+    
+        // Login successful (replace with session management or token generation)
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: expire });
+        res.cookie('token',token, {
+            httpOnly: true,
+            sameSite: 'lax',
+            maxAge: 1800000
+        })
+        res.status(200).json({ message: 'Login successful'}); 
+        console.log('login success');
+    
+      } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Internal server error' });
+      }
     }
+    
 }
 
 module.exports = userController;

@@ -1,6 +1,8 @@
-/* const { DataTypes, Sequelize } = require("sequelize")
+const { DataTypes, Sequelize } = require("sequelize")
 
 const sequelize = require('../config/databaseConnection');
+const bcrypt = require('bcrypt');
+const { Hooks } = require("sequelize/lib/hooks");
 
 const User = sequelize.define('user', {
     id:{
@@ -15,18 +17,35 @@ const User = sequelize.define('user', {
     },
     password:{
         type: DataTypes.STRING,
+        allowNull: false
     },
     email:{
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+          isEmail: true
+        }
     }
 
 }, {
-    freezeTableName: true 
-});
+    freezeTableName: true,
+    hooks: {
+      beforeCreate: async (user) => {
+        console.log(user.password);
+        const saltRounds = 10;
+        user.password = await bcrypt.hash(user.password, saltRounds);
+        console.log(user.password);
+      }
+    } 
+},
 
-module.exports = User; */
 
-module.exports = (sequelize, DataTypes) => {
+);
+
+module.exports = User;
+
+/* module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define('user', {
       userId: {
         type: DataTypes.INTEGER,
@@ -57,5 +76,5 @@ module.exports = (sequelize, DataTypes) => {
     });
   
     return User;
-  };
+  }; */
   
